@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>honghajalasombut — connect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky-night: #0d1420;
+    --grass: #5c8a3a;
+    --grass-dark: #4a7230;
+    --stone: #8a8a8a;
+    --stone-dark: #5c5c5c;
+    --emerald: #3fd67e;
+    --redstone: #e0453f;
+    --gold: #f4c542;
+    --azure: #4fa3e0;
+    --panel: #1c2419;
+    --panel-edge: #10150d;
+    --text: #eef1e8;
+    --text-dim: #a8b39a;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; height: 100%; }
+
+  body {
+    font-family: 'JetBrains Mono', 'Sarabun', sans-serif;
+    color: var(--text);
+    background: linear-gradient(180deg, var(--sky-night) 0%, #182a1c 55%, #0e150c 100%);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .particle {
+    position: fixed;
+    width: 3px;
+    height: 3px;
+    background: var(--emerald);
+    opacity: 0.3;
+    animation: drift linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes drift {
+    from { transform: translateY(110vh) translateX(0); }
+    to { transform: translateY(-10vh) translateX(30px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .particle { animation: none; display: none; }
+    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 1240px;
+    max-height: 100%;
+  }
+
+  .card {
+    width: 100%;
+    background: var(--panel);
+    border: 3px solid var(--panel-edge);
+    box-shadow: 0 0 0 3px var(--stone-dark), 0 20px 50px rgba(0,0,0,0.6);
+    position: relative;
+    max-height: 100%;
+    overflow-y: auto;
+  }
+
+  .card::before {
+    content: "";
+    position: absolute;
+    top: -9px;
+    left: -3px;
+    right: -3px;
+    height: 9px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--grass) 0px, var(--grass) 16px,
+      var(--grass-dark) 16px, var(--grass-dark) 20px
+    );
+  }
+
+  .header {
+    background: linear-gradient(180deg, var(--grass) 0%, var(--grass-dark) 100%);
+    padding: 16px 24px 14px;
+    border-bottom: 3px solid var(--panel-edge);
+    text-align: center;
+  }
+
+  .eyebrow {
+    font-family: 'Sarabun', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.85);
+    margin: 0 0 4px;
+  }
+
+  h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(14px, 3.2vw, 20px);
+    line-height: 1.5;
+    margin: 0;
+    color: #fff;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.35);
+    word-break: break-word;
+  }
+
+  .layout {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .main-col {
+    flex: 1;
+    min-width: 0;
+    padding: 18px 24px 16px;
+  }
+
+  .side-col {
+    flex: 0 0 240px;
+    border-left: 3px solid var(--panel-edge);
+    padding: 18px 18px 16px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .intro {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    margin: 0 0 14px;
+  }
+
+  .version-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .version-chip {
+    flex: 1;
+    min-width: 160px;
+    background: var(--panel-edge);
+    border: 2px solid rgba(255,255,255,0.06);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .version-chip-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+  }
+
+  .version-chip-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  /* Status Panel below version box */
+  .status-panel {
+    background: var(--panel-edge);
+    border: 2px solid rgba(255,255,255,0.08);
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .status-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .status-metrics {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .status-metric-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .status-metric-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+  }
+
+  .status-metric-val {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .section { margin-bottom: 16px; }
+  .section:last-child { margin-bottom: 0; }
+
+  .section-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+  }
+
+  .conn-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 10px;
+  }
+
+  .conn-block {
+    background: var(--panel-edge);
+    border: 2px solid rgba(255,255,255,0.06);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .conn-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .indicator {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    background: var(--stone);
+    box-shadow: inset -2px -2px 0 rgba(0,0,0,0.25);
+  }
+
+  .indicator.online { background: var(--emerald); }
+  .indicator.offline { background: var(--redstone); }
+  .indicator.checking { background: var(--gold); animation: pulse 1s steps(2) infinite; }
+  .indicator.info { background: var(--azure); }
+
+  @keyframes pulse { 50% { opacity: 0.35; } }
+
+  .conn-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .conn-label.online { color: var(--emerald); }
+  .conn-label.offline { color: var(--redstone); }
+  .conn-label.checking { color: var(--gold); }
+  .conn-label.info { color: var(--azure); }
+
+  .addr-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .addr-box {
+    background: rgba(255,255,255,0.04);
+    padding: 6px 10px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .addr-box.port { flex: 0 0 auto; }
+
+  .addr-box-label {
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    margin: 0 0 3px;
+  }
+
+  .addr-box-value {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    word-break: break-all;
+    margin: 0;
+  }
+
+  .conn-note {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin: 4px 0 0;
+  }
+
+  .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .refresh-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--emerald);
+    display: inline-block;
+    margin-right: 6px;
+    animation: blink 2s steps(2) infinite;
+  }
+
+  @keyframes blink { 50% { opacity: 0.2; } }
+
+  .maintainers-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    margin: 0 0 12px;
+  }
+
+  .maintainer-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+  }
+
+  .maintainer-block {
+    background: var(--panel-edge);
+    border: 2px solid rgba(255,255,255,0.06);
+    padding: 10px;
+  }
+
+  .maintainer-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .contact-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .contact-chip {
+    background: rgba(255,255,255,0.04);
+    padding: 6px 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .contact-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .contact-icon.line { background: #06C755; }
+  .contact-icon.instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+  .contact-icon.discord { background: #5865F2; }
+
+  .contact-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+
+  .contact-platform {
+    font-size: 7px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+  }
+
+  .contact-handle {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (max-width: 720px) {
+    .layout { flex-direction: column; }
+    .side-col {
+      flex: none;
+      border-left: none;
+      border-top: 3px solid var(--panel-edge);
+    }
+    .maintainer-list { flex-direction: row; flex-wrap: wrap; }
+    .maintainer-block { flex: 1; min-width: 180px; }
+  }
+
+  @media (max-width: 520px) {
+    .header { padding: 12px 16px 10px; }
+    .main-col { padding: 14px 16px 12px; }
+    .side-col { padding: 12px 16px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="card">
+    <div class="header">
+      <p class="eyebrow">ระบบตรวจสอบสถานะเซิร์ฟเวอร์</p>
+      <h1>honghajalasombut</h1>
+    </div>
+
+    <div class="layout">
+      <div class="main-col">
+        <p class="intro">เว็บบอร์ดแสดงสถานะสดสำหรับเซิร์ฟเวอร์ Minecraft honghajalasombut — ตรวจสอบสถานะเซิร์ฟเวอร์และจำนวนผู้เล่นออนไลน์แบบเรียลไทม์ก่อนเข้าใช้งาน</p>
+
+        <div class="version-box">
+          <div class="version-chip">
+            <span class="version-chip-label">Java version</span>
+            <span class="version-chip-value">1.9.x – 26.x</span>
+          </div>
+          <div class="version-chip">
+            <span class="version-chip-label">Bedrock version</span>
+            <span class="version-chip-value">26.x</span>
+          </div>
+        </div>
+
+        <!-- Online Status Box -->
+        <div class="status-panel">
+          <div class="status-left">
+            <div class="indicator checking" id="global-indicator"></div>
+            <span class="conn-label checking" id="global-label">CHECKING…</span>
+          </div>
+          <div class="status-metrics">
+            <div class="status-metric-item">
+              <span class="status-metric-label">Players Online</span>
+              <span class="status-metric-val" id="global-players">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <p class="section-title">MWIT-WiFi network</p>
+          <div class="conn-grid">
+            <div class="conn-block">
+              <div class="conn-top">
+                <div class="indicator info"></div>
+                <span class="conn-label info">DIRECT · JAVA</span>
+              </div>
+              <div class="addr-row">
+                <div class="addr-box">
+                  <p class="addr-box-label">Address</p>
+                  <p class="addr-box-value">tubhaserver.local</p>
+                </div>
+              </div>
+              <p class="conn-note">MWIT-WiFi network only. Default port — no port needed.</p>
+            </div>
+            <div class="conn-block">
+              <div class="conn-top">
+                <div class="indicator info"></div>
+                <span class="conn-label info">DIRECT · BEDROCK</span>
+              </div>
+              <div class="addr-row">
+                <div class="addr-box">
+                  <p class="addr-box-label">Address</p>
+                  <p class="addr-box-value">tubhaserver.local</p>
+                </div>
+                <div class="addr-box port">
+                  <p class="addr-box-label">Port</p>
+                  <p class="addr-box-value">19132</p>
+                </div>
+              </div>
+              <p class="conn-note">MWIT-WiFi network only.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <p class="section-title">Other networks</p>
+          <div class="conn-grid">
+            <div class="conn-block">
+              <div class="conn-top">
+                <span class="conn-label info">JAVA ADDRESS</span>
+              </div>
+              <div class="addr-row">
+                <div class="addr-box">
+                  <p class="addr-box-label">Address</p>
+                  <p class="addr-box-value">governors-tubby.tun.ply.gg</p>
+                </div>
+              </div>
+            </div>
+            <div class="conn-block">
+              <div class="conn-top">
+                <span class="conn-label info">BEDROCK ADDRESS</span>
+              </div>
+              <div class="addr-row">
+                <div class="addr-box">
+                  <p class="addr-box-label">Address</p>
+                  <p class="addr-box-value">stank-earth.tun.ply.gg</p>
+                </div>
+                <div class="addr-box port">
+                  <p class="addr-box-label">Port</p>
+                  <p class="addr-box-value">1841</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <span><span class="refresh-dot"></span>auto-refresh 10s</span>
+          <span id="last-checked">—</span>
+        </div>
+      </div>
+
+      <div class="side-col">
+        <p class="maintainers-title">Maintainers</p>
+        <div class="maintainer-list">
+          <div class="maintainer-block">
+            <p class="maintainer-name">ปริ้นซ์ (36.5)</p>
+            <div class="contact-list">
+              <div class="contact-chip">
+                <div class="contact-icon line">L</div>
+                <div class="contact-info">
+                  <span class="contact-platform">Line</span>
+                  <span class="contact-handle">kattapis64</span>
+                </div>
+              </div>
+              <div class="contact-chip">
+                <div class="contact-icon instagram">IG</div>
+                <div class="contact-info">
+                  <span class="contact-platform">Instagram</span>
+                  <span class="contact-handle">@ksripairojn</span>
+                </div>
+              </div>
+              <div class="contact-chip">
+                <div class="contact-icon discord">D</div>
+                <div class="contact-info">
+                  <span class="contact-platform">Discord</span>
+                  <span class="contact-handle">kattapis64</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="maintainer-block">
+            <p class="maintainer-name">ต้นหน (36.5)</p>
+            <div class="contact-list">
+              <div class="contact-chip">
+                <div class="contact-icon line">L</div>
+                <div class="contact-info">
+                  <span class="contact-platform">Line</span>
+                  <span class="contact-handle">skymissblueboy</span>
+                </div>
+              </div>
+              <div class="contact-chip">
+                <div class="contact-icon instagram">IG</div>
+                <div class="contact-info">
+                  <span class="contact-platform">Instagram</span>
+                  <span class="contact-handle">@honwaran</span>
+                </div>
+              </div>
+              <div class="contact-chip">
+                <div class="contact-icon discord">D</div>
+                <div class="contact-info">
+                  <span class="contact-platform">Discord</span>
+                  <span class="contact-handle">skymissblueboy</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const REFRESH_MS = 10000;
+  const JAVA_ADDRESS = "governors-tubby.tun.ply.gg";
+
+  const globalIndicator = document.getElementById('global-indicator');
+  const globalLabel = document.getElementById('global-label');
+  const globalPlayers = document.getElementById('global-players');
+  const lastChecked = document.getElementById('last-checked');
+
+  function setState(indicatorEl, labelEl, state) {
+    indicatorEl.className = 'indicator ' + state;
+    labelEl.className = 'conn-label ' + state;
+    labelEl.textContent = state === 'online' ? 'ONLINE' : state === 'offline' ? 'OFFLINE' : 'CHECKING…';
+  }
+
+  async function checkServerStatus() {
+    setState(globalIndicator, globalLabel, 'checking');
+    try {
+      const res = await fetch(`https://api.mcstatus.io/v2/status/java/${encodeURIComponent(JAVA_ADDRESS)}`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+
+      if (data.online) {
+        setState(globalIndicator, globalLabel, 'online');
+        globalPlayers.textContent = `${data.players?.online ?? 0} / ${data.players?.max ?? '?'}`;
+      } else {
+        setState(globalIndicator, globalLabel, 'offline');
+        globalPlayers.textContent = '—';
+      }
+    } catch (err) {
+      console.error('[server status] fetch failed', err);
+      setState(globalIndicator, globalLabel, 'offline');
+      globalPlayers.textContent = '—';
+    }
+  }
+
+  async function checkAll() {
+    await checkServerStatus();
+    lastChecked.textContent = 'checked ' + new Date().toLocaleTimeString();
+  }
+
+  checkAll();
+  setInterval(checkAll, REFRESH_MS);
+
+  const body = document.body;
+  for (let i = 0; i < 10; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.animationDuration = (8 + Math.random() * 10) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    body.appendChild(p);
+  }
+</script>
+
+</body>
+</html>

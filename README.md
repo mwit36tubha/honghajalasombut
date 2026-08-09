@@ -1,2 +1,2 @@
-# honghajalasombut-website
+# honghajalasombut
 Checks the Minecraft server online status.

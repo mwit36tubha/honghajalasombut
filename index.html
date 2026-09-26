@@ -1,690 +1,321 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>honghajalasombut — connect</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --sky-night: #0d1420;
-    --grass: #5c8a3a;
-    --grass-dark: #4a7230;
-    --stone: #8a8a8a;
-    --stone-dark: #5c5c5c;
-    --emerald: #3fd67e;
-    --redstone: #e0453f;
-    --gold: #f4c542;
-    --azure: #4fa3e0;
-    --panel: #1c2419;
-    --panel-edge: #10150d;
-    --text: #eef1e8;
-    --text-dim: #a8b39a;
-  }
-
-  * { box-sizing: border-box; }
-
-  html, body { margin: 0; padding: 0; height: 100%; }
-
-  body {
-    font-family: 'JetBrains Mono', 'Sarabun', sans-serif;
-    color: var(--text);
-    background: linear-gradient(180deg, var(--sky-night) 0%, #182a1c 55%, #0e150c 100%);
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .particle {
-    position: fixed;
-    width: 3px;
-    height: 3px;
-    background: var(--emerald);
-    opacity: 0.3;
-    animation: drift linear infinite;
-    pointer-events: none;
-  }
-
-  @keyframes drift {
-    from { transform: translateY(110vh) translateX(0); }
-    to { transform: translateY(-10vh) translateX(30px); }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .particle { animation: none; display: none; }
-    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
-  }
-
-  .wrap {
-    width: 100%;
-    max-width: 1240px;
-    max-height: 100%;
-  }
-
-  .card {
-    width: 100%;
-    background: var(--panel);
-    border: 3px solid var(--panel-edge);
-    box-shadow: 0 0 0 3px var(--stone-dark), 0 20px 50px rgba(0,0,0,0.6);
-    position: relative;
-    max-height: 100%;
-    overflow-y: auto;
-  }
-
-  .card::before {
-    content: "";
-    position: absolute;
-    top: -9px;
-    left: -3px;
-    right: -3px;
-    height: 9px;
-    background: repeating-linear-gradient(
-      90deg,
-      var(--grass) 0px, var(--grass) 16px,
-      var(--grass-dark) 16px, var(--grass-dark) 20px
-    );
-  }
-
-  .header {
-    background: linear-gradient(180deg, var(--grass) 0%, var(--grass-dark) 100%);
-    padding: 16px 24px 14px;
-    border-bottom: 3px solid var(--panel-edge);
-    text-align: center;
-  }
-
-  .eyebrow {
-    font-family: 'Sarabun', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: rgba(255,255,255,0.85);
-    margin: 0 0 4px;
-  }
-
-  h1 {
-    font-family: 'Press Start 2P', monospace;
-    font-size: clamp(14px, 3.2vw, 20px);
-    line-height: 1.5;
-    margin: 0;
-    color: #fff;
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.35);
-    word-break: break-word;
-  }
-
-  .layout {
-    display: flex;
-    align-items: stretch;
-  }
-
-  .main-col {
-    flex: 1;
-    min-width: 0;
-    padding: 18px 24px 16px;
-  }
-
-  .side-col {
-    flex: 0 0 240px;
-    border-left: 3px solid var(--panel-edge);
-    padding: 18px 18px 16px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .intro {
-    font-size: 13px;
-    line-height: 1.6;
-    color: var(--text-dim);
-    margin: 0 0 14px;
-  }
-
-  .version-box {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 12px;
-  }
-
-  .version-chip {
-    flex: 1;
-    min-width: 160px;
-    background: var(--panel-edge);
-    border: 2px solid rgba(255,255,255,0.06);
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-
-  .version-chip-label {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--text-dim);
-  }
-
-  .version-chip-value {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--gold);
-  }
-
-  /* Status Panel below version box */
-  .status-panel {
-    background: var(--panel-edge);
-    border: 2px solid rgba(255,255,255,0.08);
-    padding: 12px 16px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .status-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .status-metrics {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-  }
-
-  .status-metric-item {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .status-metric-label {
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--text-dim);
-  }
-
-  .status-metric-val {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  .section { margin-bottom: 16px; }
-  .section:last-child { margin-bottom: 0; }
-
-  .section-title {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--text-dim);
-    margin: 0 0 8px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .section-title::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: rgba(255,255,255,0.08);
-  }
-
-  .conn-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-    gap: 10px;
-  }
-
-  .conn-block {
-    background: var(--panel-edge);
-    border: 2px solid rgba(255,255,255,0.06);
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .conn-top {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .indicator {
-    width: 12px;
-    height: 12px;
-    flex-shrink: 0;
-    background: var(--stone);
-    box-shadow: inset -2px -2px 0 rgba(0,0,0,0.25);
-  }
-
-  .indicator.online { background: var(--emerald); }
-  .indicator.offline { background: var(--redstone); }
-  .indicator.checking { background: var(--gold); animation: pulse 1s steps(2) infinite; }
-  .indicator.info { background: var(--azure); }
-
-  @keyframes pulse { 50% { opacity: 0.35; } }
-
-  .conn-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-  }
-
-  .conn-label.online { color: var(--emerald); }
-  .conn-label.offline { color: var(--redstone); }
-  .conn-label.checking { color: var(--gold); }
-  .conn-label.info { color: var(--azure); }
-
-  .addr-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 6px;
-  }
-
-  .addr-box {
-    background: rgba(255,255,255,0.04);
-    padding: 6px 10px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .addr-box.port { flex: 0 0 auto; }
-
-  .addr-box-label {
-    font-size: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--text-dim);
-    margin: 0 0 3px;
-  }
-
-  .addr-box-value {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text);
-    word-break: break-all;
-    margin: 0;
-  }
-
-  .conn-note {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin: 4px 0 0;
-  }
-
-  .footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-top: 14px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255,255,255,0.06);
-  }
-
-  .refresh-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--emerald);
-    display: inline-block;
-    margin-right: 6px;
-    animation: blink 2s steps(2) infinite;
-  }
-
-  @keyframes blink { 50% { opacity: 0.2; } }
-
-  .maintainers-title {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--text-dim);
-    margin: 0 0 12px;
-  }
-
-  .maintainer-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    overflow-y: auto;
-  }
-
-  .maintainer-block {
-    background: var(--panel-edge);
-    border: 2px solid rgba(255,255,255,0.06);
-    padding: 10px;
-  }
-
-  .maintainer-name {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text);
-    margin: 0 0 8px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-
-  .contact-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .contact-chip {
-    background: rgba(255,255,255,0.04);
-    padding: 6px 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .contact-icon {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 8px;
-    font-weight: 700;
-    color: #fff;
-  }
-
-  .contact-icon.line { background: #06C755; }
-  .contact-icon.instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
-  .contact-icon.discord { background: #5865F2; }
-
-  .contact-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-
-  .contact-platform {
-    font-size: 7px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--text-dim);
-  }
-
-  .contact-handle {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  @media (max-width: 720px) {
-    .layout { flex-direction: column; }
-    .side-col {
-      flex: none;
-      border-left: none;
-      border-top: 3px solid var(--panel-edge);
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>สถานะเซิร์ฟเวอร์ - Honghajalasombut</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
     }
-    .maintainer-list { flex-direction: row; flex-wrap: wrap; }
-    .maintainer-block { flex: 1; min-width: 180px; }
-  }
-
-  @media (max-width: 520px) {
-    .header { padding: 12px 16px 10px; }
-    .main-col { padding: 14px 16px 12px; }
-    .side-col { padding: 12px 16px 12px; }
-  }
-</style>
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-slate-950">
 
-<div class="wrap">
-  <div class="card">
-    <div class="header">
-      <p class="eyebrow">ระบบตรวจสอบสถานะเซิร์ฟเวอร์</p>
-      <h1>honghajalasombut</h1>
+  <!-- Top Header Nav -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="relative flex h-3 w-3">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+        </div>
+        <span class="font-semibold text-slate-100 tracking-wide text-base sm:text-lg">Honghajalasombut Server</span>
+      </div>
+      <a href="https://github.com/mwit36tubha" target="_blank" rel="noopener noreferrer" 
+         class="text-xs sm:text-sm text-slate-400 hover:text-slate-100 transition-colors duration-200 flex items-center gap-2 bg-slate-800/80 px-3.5 py-1.5 rounded-full border border-slate-700/60">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub Repository
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-5xl mx-auto w-full px-4 py-8 sm:py-12 flex-grow flex flex-col justify-center gap-8 sm:gap-10">
+    
+    <!-- Hero Title -->
+    <div class="text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium mb-3">
+        <span>🎮</span> สถานะเซิร์ฟเวอร์ Minecraft / Server Dashboard
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-bold text-white tracking-tight mb-3">ตรวจสอบที่อยู่สำหรับเชื่อมต่อ</h1>
+      <p class="text-slate-400 text-sm sm:text-base max-w-xl mx-auto font-light">
+        รองรับการเชื่อมต่อทั้งภายในวงแลน (Local Network) และภายนอกผ่าน playit.gg
+      </p>
     </div>
 
-    <div class="layout">
-      <div class="main-col">
-        <p class="intro">เว็บบอร์ดแสดงสถานะสดสำหรับเซิร์ฟเวอร์ Minecraft honghajalasombut — ตรวจสอบสถานะเซิร์ฟเวอร์และจำนวนผู้เล่นออนไลน์แบบเรียลไทม์ก่อนเข้าใช้งาน</p>
-
-        <div class="version-box">
-          <div class="version-chip">
-            <span class="version-chip-label">Java version</span>
-            <span class="version-chip-value">1.9.x – 26.x</span>
+    <!-- Primary Status Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto w-full">
+      
+      <!-- Address Box (Main Dynamic Local IP) -->
+      <div class="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-6 shadow-xl hover:border-slate-700/80 transition-all duration-300 flex flex-col justify-between relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none"></div>
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-xs font-semibold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"></path></svg>
+              Local IP (IPv4 Address)
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span> เปิดใช้งานอยู่
+            </span>
           </div>
-          <div class="version-chip">
-            <span class="version-chip-label">Bedrock version</span>
-            <span class="version-chip-value">26.x</span>
-          </div>
+          <p class="addr-box-value text-2xl sm:text-3xl font-bold text-white mono tracking-tight break-all py-3" id="ip-address">
+            Fetching...
+          </p>
         </div>
-
-        <!-- Online Status Box -->
-        <div class="status-panel">
-          <div class="status-left">
-            <div class="indicator checking" id="global-indicator"></div>
-            <span class="conn-label checking" id="global-label">CHECKING…</span>
-          </div>
-          <div class="status-metrics">
-            <div class="status-metric-item">
-              <span class="status-metric-label">Players Online</span>
-              <span class="status-metric-val" id="global-players">—</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="section">
-          <p class="section-title">MWIT-WiFi network</p>
-          <div class="conn-grid">
-            <div class="conn-block">
-              <div class="conn-top">
-                <div class="indicator info"></div>
-                <span class="conn-label info">DIRECT · JAVA</span>
-              </div>
-              <div class="addr-row">
-                <div class="addr-box">
-                  <p class="addr-box-label">Address</p>
-                  <p class="addr-box-value" id="ip-address">Fetching...</p>
-                </div>
-              </div>
-              <p class="conn-note">MWIT-WiFi network only. Default port — no port needed.</p>
-            </div>
-            <div class="conn-block">
-              <div class="conn-top">
-                <div class="indicator info"></div>
-                <span class="conn-label info">DIRECT · BEDROCK</span>
-              </div>
-              <div class="addr-row">
-                <div class="addr-box">
-                  <p class="addr-box-label">Address</p>
-                  <p class="addr-box-value" id="ip-address">Fetching...</p>
-                </div>
-                <div class="addr-box port">
-                  <p class="addr-box-label">Port</p>
-                  <p class="addr-box-value">19132</p>
-                </div>
-              </div>
-              <p class="conn-note">MWIT-WiFi network only.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="section">
-          <p class="section-title">Other networks</p>
-          <div class="conn-grid">
-            <div class="conn-block">
-              <div class="conn-top">
-                <span class="conn-label info">JAVA ADDRESS</span>
-              </div>
-              <div class="addr-row">
-                <div class="addr-box">
-                  <p class="addr-box-label">Address</p>
-                  <p class="addr-box-value">governors-tubby.tun.ply.gg</p>
-                </div>
-              </div>
-            </div>
-            <div class="conn-block">
-              <div class="conn-top">
-                <span class="conn-label info">BEDROCK ADDRESS</span>
-              </div>
-              <div class="addr-row">
-                <div class="addr-box">
-                  <p class="addr-box-label">Address</p>
-                  <p class="addr-box-value">stank-earth.tun.ply.gg</p>
-                </div>
-                <div class="addr-box port">
-                  <p class="addr-box-label">Port</p>
-                  <p class="addr-box-value">1841</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="footer">
-          <span><span class="refresh-dot"></span>auto-refresh 30s</span>
-          <span id="last-checked">—</span>
+        <div class="mt-4 pt-4 border-t border-slate-800/60 flex justify-between items-center text-xs text-slate-400">
+          <span>อินเทอร์เฟซ: <span class="text-slate-200 font-medium">wlp2s0</span></span>
+          <button onclick="copyText('ip-address', 'copy-local-btn')" class="hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95">
+            <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            <span id="copy-local-btn">คัดลอก IP</span>
+          </button>
         </div>
       </div>
 
-      <div class="side-col">
-        <p class="maintainers-title">Maintainers</p>
-        <div class="maintainer-list">
-          <div class="maintainer-block">
-            <p class="maintainer-name">ปริ้นซ์ (36.5)</p>
-            <div class="contact-list">
-              <div class="contact-chip">
-                <div class="contact-icon line">L</div>
-                <div class="contact-info">
-                  <span class="contact-platform">Line</span>
-                  <span class="contact-handle">kitti_prince</span>
-                </div>
+      <!-- Port & Info Box -->
+      <div class="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-6 shadow-xl hover:border-slate-700/80 transition-all duration-300 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+              พอร์ตมาตรฐาน (Local Default Port)
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              Auto Push 1 ชั่วโมง
+            </span>
+          </div>
+          <div class="py-2">
+            <p class="text-sm text-slate-400 mb-1">พอร์ตสำหรับเชื่อมต่อภายในแลน:</p>
+            <p class="text-xl sm:text-2xl font-bold text-slate-100 mono">Minecraft Java: 25565</p>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-slate-800/60 flex justify-between items-center text-xs text-slate-400">
+          <span>ผู้ให้บริการ: <span class="text-slate-200 font-medium">Gist Raw Sync</span></span>
+          <span>Status: Online</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Alternate Connection / Playit.gg Section -->
+    <div class="max-w-4xl mx-auto w-full bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-slate-200 flex items-center gap-2">
+          <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+          ตัวเลือกการเชื่อมต่ออื่นๆ (playit.gg)
+        </h2>
+        <span class="text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2.5 py-1 rounded-full font-medium">External Tunnel</span>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        
+        <!-- Java Address -->
+        <div class="bg-slate-950/60 border border-slate-800/60 rounded-xl p-4 flex flex-col justify-between hover:border-slate-700/80 transition-all">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold text-emerald-400">JAVA ADDRESS</span>
+              <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded">PC</span>
+            </div>
+            <p class="text-slate-200 font-semibold mono text-xs sm:text-sm break-all" id="java-addr">governors-tubby.tun.ply.gg</p>
+          </div>
+          <button onclick="copyText('java-addr', 'copy-java-btn')" class="mt-4 text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-medium bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-800 hover:border-slate-700 justify-between">
+            <span id="copy-java-btn">คัดลอก Java Address</span>
+            <span>&rarr;</span>
+          </button>
+        </div>
+
+        <!-- Bedrock Address -->
+        <div class="bg-slate-950/60 border border-slate-800/60 rounded-xl p-4 flex flex-col justify-between hover:border-slate-700/80 transition-all">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold text-cyan-400">BEDROCK ADDRESS</span>
+              <span class="text-[10px] bg-cyan-500/10 text-cyan-400 px-1.5 py-0.5 rounded">Bedrock / PE</span>
+            </div>
+            <p class="text-slate-200 font-semibold mono text-xs sm:text-sm break-all" id="bedrock-addr">stank-earth.tun.ply.gg</p>
+          </div>
+          <button onclick="copyText('bedrock-addr', 'copy-bedrock-btn')" class="mt-4 text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-medium bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-800 hover:border-slate-700 justify-between">
+            <span id="copy-bedrock-btn">คัดลอก Bedrock Address</span>
+            <span>&rarr;</span>
+          </button>
+        </div>
+
+        <!-- Port -->
+        <div class="bg-slate-950/60 border border-slate-800/60 rounded-xl p-4 flex flex-col justify-between hover:border-slate-700/80 transition-all">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold text-amber-400">PORT (Bedrock/PE)</span>
+              <span class="text-[10px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded">Port Number</span>
+            </div>
+            <p class="text-slate-200 font-semibold mono text-xl py-1" id="port-num">1841</p>
+            <p class="text-[11px] text-slate-500">พอร์ตสำหรับต่อผ่าน playit.gg ใน MC Bedrock</p>
+          </div>
+          <button onclick="copyText('port-num', 'copy-port-btn')" class="mt-2 text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-medium bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-800 hover:border-slate-700 justify-between">
+            <span id="copy-port-btn">คัดลอก Port</span>
+            <span>&rarr;</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Server Maintainers Section -->
+    <div class="max-w-4xl mx-auto w-full bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm">
+      <h2 class="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        ผู้ดูแลระบบ (Server Maintainers)
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Maintainer 1: Prince -->
+        <div class="bg-slate-950/60 border border-slate-800/70 rounded-xl p-5 flex flex-col justify-between hover:border-slate-700/80 transition-all">
+          <div>
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center font-bold text-emerald-400 text-lg">
+                ป
               </div>
-              <div class="contact-chip">
-                <div class="contact-icon instagram">IG</div>
-                <div class="contact-info">
-                  <span class="contact-platform">Instagram</span>
-                  <span class="contact-handle">@ksripairojn</span>
-                </div>
-              </div>
-              <div class="contact-chip">
-                <div class="contact-icon discord">D</div>
-                <div class="contact-info">
-                  <span class="contact-platform">Discord</span>
-                  <span class="contact-handle">kattapis64</span>
-                </div>
+              <div>
+                <h3 class="font-semibold text-slate-100 text-base">ปริ้นซ์ (36.5)</h3>
+                <span class="text-xs text-emerald-400/90 font-medium">Server Administrator</span>
               </div>
             </div>
-          </div>
-          <div class="maintainer-block">
-            <p class="maintainer-name">ต้นหน (36.5)</p>
-            <div class="contact-list">
-              <div class="contact-chip">
-                <div class="contact-icon line">L</div>
-                <div class="contact-info">
-                  <span class="contact-platform">Line</span>
-                  <span class="contact-handle">skymissblueboy</span>
-                </div>
+            
+            <div class="space-y-2 text-xs text-slate-300 mt-4 bg-slate-900/60 p-3 rounded-lg border border-slate-800/50">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 flex items-center gap-1.5"><span class="text-emerald-400 font-bold">L</span> Line:</span>
+                <span class="mono font-medium text-slate-200">kitti_prince</span>
               </div>
-              <div class="contact-chip">
-                <div class="contact-icon instagram">IG</div>
-                <div class="contact-info">
-                  <span class="contact-platform">Instagram</span>
-                  <span class="contact-handle">@honwaran</span>
-                </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 flex items-center gap-1.5"><span class="text-pink-400 font-bold">IG</span> Instagram:</span>
+                <span class="mono font-medium text-slate-200">@ksripairojn</span>
               </div>
-              <div class="contact-chip">
-                <div class="contact-icon discord">D</div>
-                <div class="contact-info">
-                  <span class="contact-platform">Discord</span>
-                  <span class="contact-handle">skymissblueboy</span>
-                </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 flex items-center gap-1.5"><span class="text-indigo-400 font-bold">D</span> Discord:</span>
+                <span class="mono font-medium text-slate-200">kattapis64</span>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Maintainer 2: Tonhon -->
+        <div class="bg-slate-950/60 border border-slate-800/70 rounded-xl p-5 flex flex-col justify-between hover:border-slate-700/80 transition-all">
+          <div>
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center font-bold text-indigo-400 text-lg">
+                ต
+              </div>
+              <div>
+                <h3 class="font-semibold text-slate-100 text-base">ต้นหน (36.5)</h3>
+                <span class="text-xs text-indigo-400/90 font-medium">Server Administrator</span>
+              </div>
+            </div>
+            
+            <div class="space-y-2 text-xs text-slate-300 mt-4 bg-slate-900/60 p-3 rounded-lg border border-slate-800/50">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 flex items-center gap-1.5"><span class="text-emerald-400 font-bold">L</span> Line:</span>
+                <span class="mono font-medium text-slate-200">skymissblueboy</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 flex items-center gap-1.5"><span class="text-pink-400 font-bold">IG</span> Instagram:</span>
+                <span class="mono font-medium text-slate-200">@honwaran</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 flex items-center gap-1.5"><span class="text-indigo-400 font-bold">D</span> Discord:</span>
+                <span class="mono font-medium text-slate-200">skymissblueboy</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
-  </div>
-</div>
 
-<script>
-  const REFRESH_MS = 30000;
-  const JAVA_ADDRESS = "governors-tubby.tun.ply.gg";
+    <!-- Manual Refresh Button -->
+    <div class="text-center">
+      <button onclick="fetchIP()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:border-slate-700 text-slate-300 text-xs sm:text-sm font-medium transition-all duration-200 active:scale-95 shadow-lg">
+        <svg id="refresh-icon" class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        อัปเดตข้อมูล IP
+      </button>
+    </div>
 
-  const globalIndicator = document.getElementById('global-indicator');
-  const globalLabel = document.getElementById('global-label');
-  const globalPlayers = document.getElementById('global-players');
-  const lastChecked = document.getElementById('last-checked');
+  </main>
 
-  function setState(indicatorEl, labelEl, state) {
-    indicatorEl.className = 'indicator ' + state;
-    labelEl.className = 'conn-label ' + state;
-    labelEl.textContent = state === 'online' ? 'ONLINE' : state === 'offline' ? 'OFFLINE' : 'CHECKING…';
-  }
+  <!-- Footer -->
+  <footer class="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
+    <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <p>&copy; Honghajalasombut Server Page. Hosted on GitHub Pages.</p>
+      <p class="text-slate-600">Push IP Service via GitHub Gist API</p>
+    </div>
+  </footer>
 
-  async function checkServerStatus() {
-    setState(globalIndicator, globalLabel, 'checking');
-    try {
-      const res = await fetch(`https://api.mcstatus.io/v2/status/java/${encodeURIComponent(JAVA_ADDRESS)}`);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
+  <!-- JavaScript Logic -->
+  <script>
+    const GIST_RAW_URL = "https://gist.githubusercontent.com/mwit36tubha/4bbe4c33555021a7e99d2259aa61542b/raw/ip.txt";
 
-      if (data.online) {
-        setState(globalIndicator, globalLabel, 'online');
-        globalPlayers.textContent = `${data.players?.online ?? 0} / ${data.players?.max ?? '?'}`;
-      } else {
-        setState(globalIndicator, globalLabel, 'offline');
-        globalPlayers.textContent = '—';
+    async function fetchIP() {
+      const ipElement = document.getElementById("ip-address");
+      const refreshIcon = document.getElementById("refresh-icon");
+
+      if (refreshIcon) refreshIcon.classList.add("animate-spin");
+
+      try {
+        const response = await fetch(`${GIST_RAW_URL}?t=${Date.now()}`);
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        
+        let ip = await response.text();
+        ip = ip.trim();
+
+        if (ipElement) {
+          ipElement.textContent = ip || "ไม่พบบันทึก IP";
+        }
+      } catch (error) {
+        console.error("Gist IP Fetch Error:", error);
+        if (ipElement) {
+          ipElement.textContent = "Unavailable";
+        }
+      } finally {
+        if (refreshIcon) {
+          setTimeout(() => refreshIcon.classList.remove("animate-spin"), 500);
+        }
       }
-    } catch (err) {
-      console.error('[server status] fetch failed', err);
-      setState(globalIndicator, globalLabel, 'offline');
-      globalPlayers.textContent = '—';
     }
-  }
 
-  async function checkAll() {
-    await checkServerStatus();
-    lastChecked.textContent = 'checked ' + new Date().toLocaleTimeString();
-  }
+    function copyText(elementId, buttonId) {
+      const targetElement = document.getElementById(elementId);
+      const buttonElement = document.getElementById(buttonId);
 
-  checkAll();
-  setInterval(checkAll, REFRESH_MS);
+      if (!targetElement) return;
 
-  const body = document.body;
-  for (let i = 0; i < 10; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    p.style.left = Math.random() * 100 + 'vw';
-    p.style.animationDuration = (8 + Math.random() * 10) + 's';
-    p.style.animationDelay = (Math.random() * 10) + 's';
-    body.appendChild(p);
-  }
-<p class="addr-box-value" id="ip-address">Fetching...</p>
+      const textToCopy = targetElement.textContent.trim();
+      if (!textToCopy || textToCopy === "Fetching..." || textToCopy === "Unavailable") return;
 
-<script>
-  const GIST_RAW_URL = "https://gist.githubusercontent.com/mwit36tubha/4bbe4c33555021a7e99d2259aa61542b/raw";
+      const tempInput = document.createElement("textarea");
+      tempInput.value = textToCopy;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
 
-  async function fetchIP() {
-    try {
-      const response = await fetch(`${GIST_RAW_URL}?t=${Date.now()}`);
-      if (!response.ok) throw new Error();
-      const ip = await response.text();
-      document.getElementById("ip-address").textContent = ip.trim();
-    } catch {
-      document.getElementById("ip-address").textContent = "Unavailable";
+      if (buttonElement) {
+        const originalText = buttonElement.textContent;
+        buttonElement.textContent = "คัดลอกเรียบร้อย!";
+        setTimeout(() => {
+          buttonElement.textContent = originalText;
+        }, 2000);
+      }
     }
-  }
 
-  fetchIP();
-</script>
-  
+    document.addEventListener("DOMContentLoaded", fetchIP);
+  </script>
 </body>
 </html>

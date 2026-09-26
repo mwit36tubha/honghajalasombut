@@ -490,7 +490,7 @@
               <div class="addr-row">
                 <div class="addr-box">
                   <p class="addr-box-label">Address</p>
-                  <p class="addr-box-value">10.16.34.33</p>
+                  <p class="addr-box-value" id="ip-address">Fetching...</p>
                 </div>
               </div>
               <p class="conn-note">MWIT-WiFi network only. Default port — no port needed.</p>
@@ -503,7 +503,7 @@
               <div class="addr-row">
                 <div class="addr-box">
                   <p class="addr-box-label">Address</p>
-                  <p class="addr-box-value">10.16.34.33</p>
+                  <p class="addr-box-value" id="ip-address">Fetching...</p>
                 </div>
                 <div class="addr-box port">
                   <p class="addr-box-label">Port</p>
@@ -667,7 +667,22 @@
     p.style.animationDelay = (Math.random() * 10) + 's';
     body.appendChild(p);
   }
-</script>
+<script>
+  const GIST_RAW_URL = "https://gist.githubusercontent.com/mwit36tubha/4bbe4c33555021a7e99d2259aa61542b/raw";
 
+  async function fetchIP() {
+    try {
+      const response = await fetch(`${GIST_RAW_URL}?t=${Date.now()}`);
+      if (!response.ok) throw new Error();
+      const ip = await response.text();
+      document.getElementById("ip-address").textContent = ip.trim();
+    } catch {
+      document.getElementById("ip-address").textContent = "Unavailable";
+    }
+  }
+
+  fetchIP();
+</script>
+  
 </body>
 </html>
